@@ -1,12 +1,13 @@
 {
-  "name": "ts-node-tmpl",
+  "name": "windowsd-plugin",
   "version": "1.0.0",
   "main": "build/index.js",
-  "repository": "git@github.com:ZhangZisu/ts-node-tmpl.git",
+  "repository": "git@github.com:ZhangZisu/windowsd-plugin.git",
   "author": "ZhangZisu <admin@zhangzisu.cn>",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^12.12.14",
+    "@types/uuid": "^3.4.6",
     "@typescript-eslint/eslint-plugin": "^2.9.0",
     "@typescript-eslint/parser": "^2.9.0",
     "eslint": "^6.7.1",
@@ -18,5 +19,9 @@
     "typescript": "^3.7.2"
   },
   "dependencies": {
+    "uuid": "^3.3.3"
+  },
+  "scripts": {
+    "prepublish": "tsc ."
   }
 }
