@@ -1,4 +1,4 @@
-import { parentPort } from "worker_threads"
+import { parentPort } from 'worker_threads'
 import uuid from 'uuid/v4'
 
 interface IRPCFnContext {
@@ -10,15 +10,15 @@ type RPCFunction = (args: any, context: IRPCFnContext) => any
 const cbs: Map<string, RPCCallback> = new Map()
 const fns: Map<string, RPCFunction> = new Map()
 
-export function register(name: string, fn: RPCFunction) {
+export function register (name: string, fn: RPCFunction) {
   if (fns.has(name)) {
     throw new Error('Mutiple registeration')
   }
   fns.set(name, fn)
-  console.log('RPC', `+Function ${name}`)
+  log('RPC', `+Function ${name}`)
 }
 
-export function invoke(method: string, args: any, cfg: any) {
+export function invoke (method: string, args: any, cfg: any) {
   return new Promise((resolve, reject) => {
     const asyncID = uuid()
     cbs.set(asyncID, (result, error) => {
@@ -30,7 +30,7 @@ export function invoke(method: string, args: any, cfg: any) {
   })
 }
 
-function handle(msg: any) {
+function handle (msg: any) {
   switch (msg.type) {
     case 'RPCRequest': return handleRequest(msg.asyncID, msg.method, msg.args, msg.cfg)
     case 'RPCResponse': return handleResponse(msg.asyncID, msg.result, msg.error)
@@ -39,7 +39,8 @@ function handle(msg: any) {
 
 parentPort!.on('message', handle)
 
-function handleRequest(asyncID: string, method: string, args: any, _cfg: any) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function handleRequest (asyncID: string, method: string, args: any, _cfg: any) {
   const p = new Promise((resolve, reject) => {
     const fn = fns.get(method)
     if (!fn) return reject(new Error('No such method'))
@@ -60,10 +61,10 @@ function handleRequest(asyncID: string, method: string, args: any, _cfg: any) {
   })
 }
 
-function handleResponse(asyncID: string, result: any, errstr: any) {
+function handleResponse (asyncID: string, result: any, errstr: any) {
   const cb = cbs.get(asyncID)
   if (!cb) {
-    console.log(`Missed response: ${asyncID}`)
+    log(`Missed response: ${asyncID}`)
     return
   }
   if (typeof errstr === 'string') cb(result, new Error(errstr))
