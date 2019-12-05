@@ -5,7 +5,7 @@ interface IRPCFnContext {
   //
 }
 type RPCCallback = (result: any, error?: Error) => void
-type RPCFunction = (args: any, context: IRPCFnContext) => any
+type RPCFunction = (args: any, context: IRPCFnContext) => Promise<any>
 
 const cbs: Map<string, RPCCallback> = new Map()
 const fns: Map<string, RPCFunction> = new Map()
@@ -67,7 +67,9 @@ function handleResponse (asyncID: string, result: any, errstr: any) {
     log(`Missed response: ${asyncID}`)
     return
   }
-  if (typeof errstr === 'string') cb(result, new Error(errstr))
+  if (typeof errstr === 'string') {
+    return cb(result, new Error(errstr))
+  }
   return cb(result)
 }
 
