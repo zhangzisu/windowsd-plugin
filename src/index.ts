@@ -70,7 +70,7 @@ function handleResponse(asyncID: string, result: any, errstr: any) {
   return cb(result)
 }
 
-export function log (data: any) {
+export function log (...data: any) {
   parentPort!.postMessage({
     type: 'log',
     data
