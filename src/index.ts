@@ -69,3 +69,10 @@ function handleResponse(asyncID: string, result: any, errstr: any) {
   if (typeof errstr === 'string') cb(result, new Error(errstr))
   return cb(result)
 }
+
+export function log (data: any) {
+  parentPort!.postMessage({
+    type: 'log',
+    data
+  })
+}
