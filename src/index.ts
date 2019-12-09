@@ -37,7 +37,7 @@ function handle (msg: any) {
   }
 }
 
-parentPort!.on('message', handle)
+parentPort && parentPort.on('message', handle)
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function handleRequest (asyncID: string, method: string, args: any, _cfg: any) {
