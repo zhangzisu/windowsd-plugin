@@ -1,4 +1,4 @@
-import { parentPort } from 'worker_threads'
+import { parentPort, isMainThread } from 'worker_threads'
 import uuid from 'uuid/v4'
 
 interface IRPCFnContext {
@@ -15,7 +15,7 @@ export function register (name: string, fn: RPCFunction) {
     throw new Error('Mutiple registeration')
   }
   fns.set(name, fn)
-  log('RPC', `+Function ${name}`)
+  log('RPC', 'fn:', name)
 }
 
 export function invoke (method: string, args: any, cfg: any) {
@@ -74,8 +74,12 @@ function handleResponse (asyncID: string, result: any, errstr: any) {
 }
 
 export function log (...data: any) {
-  parentPort!.postMessage({
-    type: 'log',
-    data
-  })
+  if (isMainThread) {
+    console.log(data)
+  } else {
+    parentPort!.postMessage({
+      type: 'log',
+      data
+    })
+  }
 }
