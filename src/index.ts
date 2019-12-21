@@ -1,10 +1,11 @@
 import { parentPort, isMainThread } from 'worker_threads'
 import uuid from 'uuid/v4'
 
-interface IRPCConfig {
+export interface IRPCConfig {
   s?: string
   t?: string
   o?: number
+  l?: boolean
 }
 
 export type RPCCallback = (error: Error | undefined, result: any) => void
