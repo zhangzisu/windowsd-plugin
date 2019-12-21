@@ -36,7 +36,7 @@ export function registerEx (name: string, fn: RPCFunctionEx) {
 export function invoke (method: string, args: any, cfg: IRPCConfig) {
   return new Promise((resolve, reject) => {
     const asyncID = uuid()
-    cbs.set(asyncID, (result, error) => {
+    cbs.set(asyncID, (error, result) => {
       cbs.delete(asyncID)
       if (error) return reject(error)
       return resolve(result)
