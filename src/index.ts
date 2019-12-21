@@ -1,11 +1,15 @@
 import { parentPort } from 'worker_threads'
 import uuid from 'uuid/v4'
 
-interface IRPCFnContext {
-  //
+interface IRPCConfig {
+  s?: string
+  t?: string
+  o?: number
 }
-type RPCCallback = (result: any, error?: Error) => void
-type RPCFunction = (args: any, context: IRPCFnContext) => Promise<any>
+
+export type RPCCallback = (error: Error | undefined, result: any) => void
+type RPCFunction = (args: any, cfg: IRPCConfig) => Promise<any>
+type RPCFunctionEx = (cfg: IRPCConfig, ...args: any) => Promise<any>
 
 const cbs: Map<string, RPCCallback> = new Map()
 const fns: Map<string, RPCFunction> = new Map()
@@ -18,7 +22,17 @@ export function register (name: string, fn: RPCFunction) {
   log('RPC', `+Function ${name}`)
 }
 
-export function invoke (method: string, args: any, cfg: any) {
+export function registerEx (name: string, fn: RPCFunctionEx) {
+  register(name, async (args, ctx) => {
+    if (args instanceof Array) {
+      return fn(ctx, ...args)
+    } else if (args === undefined || args === null) {
+      return fn(ctx)
+    } else throw new Error('Bad args')
+  })
+}
+
+export function invoke (method: string, args: any, cfg: IRPCConfig) {
   return new Promise((resolve, reject) => {
     const asyncID = uuid()
     cbs.set(asyncID, (result, error) => {
@@ -39,12 +53,11 @@ function handle (msg: any) {
 
 parentPort!.on('message', handle)
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function handleRequest (asyncID: string, method: string, args: any, _cfg: any) {
+function handleRequest (asyncID: string, method: string, args: any, cfg: IRPCConfig) {
   const p = new Promise((resolve, reject) => {
     const fn = fns.get(method)
     if (!fn) return reject(new Error('No such method'))
-    return resolve(fn(args, {}))
+    return resolve(fn(args, cfg))
   })
   p.then(result => {
     parentPort!.postMessage({
@@ -68,9 +81,9 @@ function handleResponse (asyncID: string, result: any, errstr: any) {
     return
   }
   if (typeof errstr === 'string') {
-    return cb(result, new Error(errstr))
+    return cb(new Error(errstr), result)
   }
-  return cb(result)
+  return cb(undefined, result)
 }
 
 export function log (...data: any) {
